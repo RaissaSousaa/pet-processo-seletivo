@@ -5,10 +5,20 @@ class Item():
     def __init__(self):
         self.dados = {}
         self.proximo_id = 1
+        self.campos_books = ["título", "gênero", "ano"]
+        self.campos_authors = ["nome", "data_nascimento", "nacionalidade"]
 
     def criar(self, info, obrigatorio):
         if obrigatorio not in info:
             return None, 'Campo obrigatório não inserido'
+        if obrigatorio == "título":
+            for chave in info:
+                if chave not in self.campos_books:
+                    return None, "Campo inválido"
+        elif obrigatorio == "nome":
+            for chave in info:
+                if chave not in self.campos_authors:
+                    return None, "Campo inválido"
         info['id'] = self.proximo_id
         self.dados[self.proximo_id] = info
         self.proximo_id += 1
@@ -61,8 +71,6 @@ class APIHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({"id": id}).encode())
 
-        
-
     def do_GET(self):
         entradaCorreta = False
         if self.path == "/books":
@@ -105,7 +113,35 @@ class APIHandler(BaseHTTPRequestHandler):
         
         self.send_response(404)
         self.end_headers()
-            
+
+    def do_PUT(self):
+        resultado = False
+        if self.path.startswith('/books/'):
+            try:
+                id = int(self.path.split('/')[-1])
+                dados_requisicao = self._ler_json()
+                resultado = self.books.atualizar(id, dados_requisicao)
+            except ValueError:
+                self.send_response(400)
+                self.end_headers()
+                return
+        elif self.path.startswith('/authors/'):
+            try:
+                id = int(self.path.split('/')[-1])
+                dados_requisicao = self._ler_json()
+                resultado = self.authors.atualizar(id, dados_requisicao)
+            except ValueError:
+                self.send_response(400)
+                self.end_headers()
+                return
+        if resultado:
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({"messagem": "Informação atualizada"}).encode())
+            return
+        self.send_response(404)
+        self.end_headers()
 
 # Função para iniciar o servidor HTTP
 def run(server_class=HTTPServer, handler_class=APIHandler, port=8000):
