@@ -6,8 +6,8 @@ class Item():
     def __init__(self):
         self.dados = {}
         self.proximo_id = 1
-        self.campos_books = ["título", "gênero", "ano"] # Únicos campos aceitos em books
-        self.campos_authors = ["nome", "data_nascimento", "nacionalidade"] # Únicos campos aceitos em authors
+        self.campos_books = ["título", "gênero", "ano"] # Únicos campos aceitos para os livros
+        self.campos_authors = ["nome", "data_nascimento", "nacionalidade"] # Únicos campos aceitos para os autores
 
     def criar(self, info, obrigatorio):
         if obrigatorio not in info: # Obriga título para livros e nome para autores
@@ -90,7 +90,7 @@ class APIHandler(BaseHTTPRequestHandler):
         if self.path.startswith('/books/'):
             try:
                 id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url 
-                item = self.books.especifico(id)
+                item = self.books.especifico(id) 
                 entradaCorreta = True
             except ValueError:
                 self.send_response(400) # Bad request // erro de sintaxe
@@ -109,7 +109,7 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_response(200) # Ok
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(item).encode())
+            self.wfile.write(json.dumps(item).encode()) # Mostra livro ou autor específico
             return
         
         self.send_response(404) # Not found
@@ -118,9 +118,9 @@ class APIHandler(BaseHTTPRequestHandler):
     def do_PUT(self):
         if self.path.startswith('/books/'):
             try:
-                id = int(self.path.split('/')[-1]) # Id recebe como inteiro o último caractere do url
+                id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url
                 dados_requisicao = self._ler_json()
-                self.books.atualizar(id, dados_requisicao)
+                self.books.atualizar(id, dados_requisicao) # Atualiza livro
             except ValueError:
                 self.send_response(400) # Bad request // erro de sintaxe
                 self.end_headers()
@@ -129,7 +129,7 @@ class APIHandler(BaseHTTPRequestHandler):
             try:
                 id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url
                 dados_requisicao = self._ler_json()
-                self.authors.atualizar(id, dados_requisicao)
+                self.authors.atualizar(id, dados_requisicao) # Atualiza autor
             except ValueError:
                 self.send_response(400) # Bad request // erro de sintaxe
                 self.end_headers()
@@ -143,13 +143,11 @@ class APIHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(json.dumps({"messagem": "Informação atualizada"}).encode())
         
-       
-
     def do_DELETE(self):
         if self.path.startswith('/books/'):
             try:
                 id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url
-                self.books.deletar(id)
+                self.books.deletar(id) # Deleta livro
             except ValueError:
                 self.send_response(400) # Bad request // erro de sintaxe
                 self.end_headers()
@@ -157,7 +155,7 @@ class APIHandler(BaseHTTPRequestHandler):
         elif self.path.startswith('/authors/'):
             try:
                 id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url
-                self.authors.deletar(id)
+                self.authors.deletar(id) # Deleta autor
             except ValueError:
                 self.send_response(400) # Bad request // erro de sintaxe
                 self.end_headers()
