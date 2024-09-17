@@ -48,7 +48,7 @@ class Item():
             else:
                 return None, "Este livro já possui um autor"
         else:
-            return None, "Esse id de livro não existe"
+            return None, "Este id de livro não existe"
         
     def listar_obras(self,id_a):
         obras = {} # Dicionário que ficará guardado as obras do autor
@@ -78,7 +78,7 @@ class APIHandler(BaseHTTPRequestHandler):
         elif self.path == "/authors": # Cria autor
             dados_requisicao = self._ler_json() # Converte json para dicionário
             id, error_msg = self.authors.criar(dados_requisicao, "nome")
-        elif self.path.startswith(f'/authors/'): # Checagem para mexer com associações
+        elif self.path.startswith(f"/authors/"): # Checagem para mexer com associações
             try:
                 id_b = int(self.path.split('/')[-1]) # id do livro recebe como inteiro o último caractere do url
                 id_a = int(self.path.split('/')[-3]) # id do autor recebe como inteiro o antepenúltimo caractere do url
@@ -94,15 +94,15 @@ class APIHandler(BaseHTTPRequestHandler):
 
         if error_msg != None:
             self.send_response(400) # Bad request // erro de sintaxe
-            self.send_header('Content-type', 'application/json')
+            self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({"error": error_msg}).encode()) 
         else:
             self.send_response(201) # Created
-            self.send_header('Content-type', 'application/json')
+            self.send_header("Content-type", "application/json")
             self.end_headers()
-            if self.path.startswith('/authors/'):
-                self.wfile.write(json.dumps({f'{id_b}': info}).encode())
+            if self.path.startswith("/authors/"):
+                self.wfile.write(json.dumps({f"{id_b}": info}).encode())
             else:
                 self.wfile.write(json.dumps({"id": id}).encode())
 
@@ -116,12 +116,12 @@ class APIHandler(BaseHTTPRequestHandler):
             dados = self.authors.listar() # Lista todos os autores
         if entradaCorreta:
             self.send_response(200) # Ok
-            self.send_header('Content-type', 'application/json')
+            self.send_header("Content-type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps(dados).encode())
             return
     
-        if self.path.startswith('/books/'):
+        if self.path.startswith("/books/"):
             try:
                 id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url 
                 item = self.books.especifico(id) 
@@ -131,10 +131,10 @@ class APIHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 return
 
-        elif self.path.startswith('/authors/'):
-            if self.path.split('/')[-1] == 'books': # Checagem para mexer com associações
+        elif self.path.startswith("/authors/"):
+            if self.path.split("/")[-1] == "books": # Checagem para mexer com associações
                 try:
-                    id_a = int(self.path.split('/')[-2]) # id do autor recebe como inteiro o antepenúltimo caractere do url
+                    id_a = int(self.path.split("/")[-2]) # id do autor recebe como inteiro o penúltimo caractere do url
                     item = self.books.listar_obras(id_a)
                     if item == {}:
                         item = {
@@ -188,23 +188,23 @@ class APIHandler(BaseHTTPRequestHandler):
             self.end_headers()
             return
         self.send_response(200) # Ok
-        self.send_header('Content-type', 'application/json')
+        self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(json.dumps({"messagem": "Informação atualizada"}).encode())
         
     def do_DELETE(self):
-        if self.path.startswith('/books/'):
+        if self.path.startswith("/books/"):
             try:
-                id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url
+                id = int(self.path.split("/")[-1]) # id recebe como inteiro o último caractere do url
                 self.books.deletar(id) # Deleta livro
             except ValueError:
                 self.send_response(400) # Bad request // erro de sintaxe
                 self.end_headers()
                 return
-        elif self.path.startswith('/authors/'):
-            if self.path.split('/')[-2] == 'books': # Checagem para mexer com associações
+        elif self.path.startswith("/authors/"):
+            if self.path.split("/")[-2] == "books": # Checagem para mexer com associações
                 try:
-                    id_b = int(self.path.split('/')[-1]) # id do livro recebe como inteiro o último caractere do url
+                    id_b = int(self.path.split("/")[-1]) # id do livro recebe como inteiro o último caractere do url
                     self.books.del_associacao(id_b) # Deleta autor
                 except ValueError:
                     self.send_response(400) # Bad request // erro de sintaxe
@@ -212,7 +212,7 @@ class APIHandler(BaseHTTPRequestHandler):
                     return
             else: # Aqui lida-se apenas com os autores
                 try:
-                    id = int(self.path.split('/')[-1]) # id recebe como inteiro o último caractere do url
+                    id = int(self.path.split("/")[-1]) # id recebe como inteiro o último caractere do url
                     self.authors.deletar(id) # Deleta autor
                 except ValueError:
                     self.send_response(400) # Bad request // erro de sintaxe
@@ -224,13 +224,13 @@ class APIHandler(BaseHTTPRequestHandler):
             return
 
         self.send_response(200) # Ok
-        self.send_header('Content-type', 'application/json')
+        self.send_header("Content-type", "application/json")
         self.end_headers()
         self.wfile.write(json.dumps({"messagem": "Item deletado"}).encode())
 
 # Função para iniciar o servidor HTTP
 def run(server_class=HTTPServer, handler_class=APIHandler, port=8000):
-    server_address = ('localhost', port)
+    server_address = ("localhost", port)
     httpd = server_class(server_address, handler_class)
     print(f"Servidor rodando na porta {port}")
     httpd.serve_forever()
