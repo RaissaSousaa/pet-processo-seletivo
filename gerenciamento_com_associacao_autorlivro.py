@@ -158,7 +158,7 @@ class APIHandler(BaseHTTPRequestHandler):
             self.send_response(200) # Ok
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(item).encode()) # Mostra livro ou autor específico *
+            self.wfile.write(json.dumps(item).encode()) # Mostra livro ou autor ou obras de um autor específico
             return
         
         self.send_response(404) # Not found
